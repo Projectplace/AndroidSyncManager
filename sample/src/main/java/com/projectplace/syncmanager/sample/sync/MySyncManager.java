@@ -1,0 +1,96 @@
+package com.projectplace.syncmanager.sample.sync;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.widget.Toast;
+
+import com.projectplace.syncmanager.SyncManager;
+import com.projectplace.syncmanager.SyncObject;
+import com.projectplace.syncmanager.sample.MyApplication;
+import com.projectplace.syncmanager.sample.MySharedPreferences;
+import com.projectplace.syncmanager.sample.R;
+import com.projectplace.syncmanager.sample.models.LoginResponse;
+
+import java.util.concurrent.TimeUnit;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
+public class MySyncManager extends SyncManager {
+
+    private static MySyncManager sInstance;
+
+    public static synchronized void initInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new MySyncManager(context);
+        }
+    }
+
+    public static MySyncManager getInstance() {
+        if (sInstance == null) {
+            throw new IllegalStateException(SyncManager.class.getSimpleName()
+                    + " is not initialized, call initializeInstance(..) method first.");
+        }
+        return sInstance;
+    }
+
+    private MySyncManager(Context context) {
+        super(context);
+    }
+
+    @Override
+    protected boolean shouldSyncObject(SyncObject sync) {
+        // Here you can check for specific conditions or if a specific sync object is allowed to sync.
+        // If the access tokens has been cleared no sync objects should be allowed to sync for example unless
+        // it is the login sync object which is used to get an access token.
+        if (MySharedPreferences.getInstance().getAccessToken() == null && !(sync instanceof SyncFetchLogin)) {
+            stopSync();
+            // Could also trigger a log out of the app here as if you
+            // have no tokens you will probably need to log in again.
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean shouldRefreshAccessToken(SyncObject sync) {
+        // Check if the access token has expired or if it is a sync object which is used to
+        // retrieve a new access token, like the SyncFetchLogin sync object
+        return !(sync instanceof SyncFetchLogin) && MySharedPreferences.getInstance().getAccessTokenExpiresIn() < TimeUnit.HOURS.toSeconds(2);
+    }
+
+    @Override
+    protected void startRefreshAccessToken(final RefreshAccessTokenCallback callback) {
+        // If the access token needs refreshing this method will be called, so refresh it here
+        MyApplication.getApiService().getAccessToken("refresh_token", "clientId", "clientSecret",
+                MySharedPreferences.getInstance().getRefreshToken(), null, null, new Callback<LoginResponse>() {
+            @Override
+            public void success(LoginResponse loginResponse, Response response) {
+                MySharedPreferences.getInstance().setTokens(loginResponse.getAccessToken(), loginResponse.getRefreshToken(), loginResponse.getExpiresInSeconds());
+                callback.accessTokenRefreshed(true);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                callback.accessTokenRefreshed(false);
+            }
+        });
+    }
+
+    @Override
+    protected void showErrorMessage(String errorMessage) {
+        // If no internet override the error message
+        if (!isNetworkAvailable(mApplicationContext)) {
+            errorMessage = mApplicationContext.getString(R.string.error_no_internet_connection);
+        }
+        Toast.makeText(mApplicationContext, errorMessage, Toast.LENGTH_LONG).show();
+    }
+
+    private boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+}
