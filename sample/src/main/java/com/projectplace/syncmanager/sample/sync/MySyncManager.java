@@ -6,9 +6,7 @@ import android.net.NetworkInfo;
 import android.widget.Toast;
 
 import com.projectplace.syncmanager.SyncManager;
-import com.projectplace.syncmanager.SyncFetch;
 import com.projectplace.syncmanager.SyncObject;
-import com.projectplace.syncmanager.SyncUpload;
 import com.projectplace.syncmanager.sample.MyApplication;
 import com.projectplace.syncmanager.sample.MySharedPreferences;
 import com.projectplace.syncmanager.sample.R;
@@ -40,11 +38,6 @@ public class MySyncManager extends SyncManager {
 
     private MySyncManager(Context context) {
         super(context);
-    }
-
-    @Override
-    protected boolean shouldResetFetch(SyncUpload newUpload, SyncFetch fetchToReset) {
-        return false;
     }
 
     @Override

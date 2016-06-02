@@ -86,6 +86,18 @@ public abstract class SyncUpload extends SyncObject {
     }
 
     /**
+     * Whenever an upload is added all current fetches will be reset. This is done to prevent any conflicts from happening.
+     * Overriding this method you can check for specific fetches that you know will never conflict with this upload. This
+     * should only be done for fetches which is very heavy so you gain lots of performance by not resetting it.
+     *
+     * @param fetch The fetch to check if it should be reset.
+     * @return true if the fetch should be reset, otherwise false.
+     */
+    protected boolean shouldResetFetch(SyncFetch fetch) {
+        return true;
+    }
+
+    /**
      * This should be called after an upload is successfully finished.
      */
     protected void uploadSuccessful() {

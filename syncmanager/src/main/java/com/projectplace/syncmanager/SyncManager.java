@@ -50,8 +50,6 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         void accessTokenRefreshed(boolean success);
     }
 
-    protected abstract boolean shouldResetFetch(SyncUpload newUpload, SyncFetch fetchToReset);
-
     protected abstract boolean shouldSyncObject(SyncObject sync);
 
     protected abstract boolean shouldRefreshAccessToken(SyncObject sync);
@@ -146,7 +144,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
 
     private void resetFetches(SyncUpload newUpload) {
         for (SyncObject fetch : mFetchList) {
-            if (shouldResetFetch(newUpload, (SyncFetch) fetch)) {
+            if (newUpload.shouldResetFetch((SyncFetch) fetch)) {
                 ((SyncFetch) fetch).setShouldReset();
             }
         }
