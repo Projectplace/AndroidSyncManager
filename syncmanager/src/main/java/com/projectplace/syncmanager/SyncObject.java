@@ -27,9 +27,14 @@ public abstract class SyncObject {
     private boolean mFailed;
     private boolean mStarted;
     private boolean mListenerCalled;
+    private boolean mNeedsAccessToken = true;
 
     public abstract void onSave();
 
+    /**
+     * Called when this sync object should start. The sync that is started should always be started on a
+     * new thread to not block other sync objects to run in parallel as this is called from the sync loop thread.
+     */
     public abstract void onStart();
 
     public abstract boolean isDone();
@@ -86,6 +91,14 @@ public abstract class SyncObject {
 
     public SyncListener getSyncListener() {
         return mSyncListener;
+    }
+
+    protected void setNeedsAccessToken(boolean needsAccessToken) {
+        mNeedsAccessToken = needsAccessToken;
+    }
+
+    public boolean needsAccessToken() {
+        return mNeedsAccessToken;
     }
 
     public boolean isStarted() {

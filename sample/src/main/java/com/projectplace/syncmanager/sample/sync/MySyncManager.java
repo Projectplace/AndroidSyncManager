@@ -6,7 +6,9 @@ import android.net.NetworkInfo;
 import android.widget.Toast;
 
 import com.projectplace.syncmanager.SyncManager;
+import com.projectplace.syncmanager.SyncFetch;
 import com.projectplace.syncmanager.SyncObject;
+import com.projectplace.syncmanager.SyncUpload;
 import com.projectplace.syncmanager.sample.MyApplication;
 import com.projectplace.syncmanager.sample.MySharedPreferences;
 import com.projectplace.syncmanager.sample.R;
@@ -30,7 +32,7 @@ public class MySyncManager extends SyncManager {
 
     public static MySyncManager getInstance() {
         if (sInstance == null) {
-            throw new IllegalStateException(SyncManager.class.getSimpleName()
+            throw new IllegalStateException(MySyncManager.class.getSimpleName()
                     + " is not initialized, call initializeInstance(..) method first.");
         }
         return sInstance;
@@ -41,11 +43,16 @@ public class MySyncManager extends SyncManager {
     }
 
     @Override
+    protected boolean shouldResetFetch(SyncUpload newUpload, SyncFetch fetchToReset) {
+        return false;
+    }
+
+    @Override
     protected boolean shouldSyncObject(SyncObject sync) {
         // Here you can check for specific conditions or if a specific sync object is allowed to sync.
         // If the access tokens has been cleared no sync objects should be allowed to sync for example unless
-        // it is the login sync object which is used to get an access token.
-        if (MySharedPreferences.getInstance().getAccessToken() == null && !(sync instanceof SyncFetchLogin)) {
+        // it is a sync object which doesn't need an access token for example.
+        if (sync.needsAccessToken() && MySharedPreferences.getInstance().getAccessToken() == null) {
             stopSync();
             // Could also trigger a log out of the app here as if you
             // have no tokens you will probably need to log in again.
@@ -56,9 +63,8 @@ public class MySyncManager extends SyncManager {
 
     @Override
     protected boolean shouldRefreshAccessToken(SyncObject sync) {
-        // Check if the access token has expired or if it is a sync object which is used to
-        // retrieve a new access token, like the SyncFetchLogin sync object
-        return !(sync instanceof SyncFetchLogin) && MySharedPreferences.getInstance().getAccessTokenExpiresIn() < TimeUnit.HOURS.toSeconds(2);
+        // Check if the access token has expired
+        return MySharedPreferences.getInstance().getAccessTokenExpiresIn() < TimeUnit.HOURS.toSeconds(2);
     }
 
     @Override
@@ -66,17 +72,17 @@ public class MySyncManager extends SyncManager {
         // If the access token needs refreshing this method will be called, so refresh it here
         MyApplication.getApiService().getAccessToken("refresh_token", "clientId", "clientSecret",
                 MySharedPreferences.getInstance().getRefreshToken(), null, null, new Callback<LoginResponse>() {
-            @Override
-            public void success(LoginResponse loginResponse, Response response) {
-                MySharedPreferences.getInstance().setTokens(loginResponse.getAccessToken(), loginResponse.getRefreshToken(), loginResponse.getExpiresInSeconds());
-                callback.accessTokenRefreshed(true);
-            }
+                    @Override
+                    public void success(LoginResponse loginResponse, Response response) {
+                        MySharedPreferences.getInstance().setTokens(loginResponse.getAccessToken(), loginResponse.getRefreshToken(), loginResponse.getExpiresInSeconds());
+                        callback.accessTokenRefreshed(true);
+                    }
 
-            @Override
-            public void failure(RetrofitError error) {
-                callback.accessTokenRefreshed(false);
-            }
-        });
+                    @Override
+                    public void failure(RetrofitError error) {
+                        callback.accessTokenRefreshed(false);
+                    }
+                });
     }
 
     @Override

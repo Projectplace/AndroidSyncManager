@@ -11,6 +11,11 @@ import retrofit.client.Response;
 
 public class SyncFetchLogin extends SyncFetchSimple<LoginResponse> {
 
+    public SyncFetchLogin() {
+        super();
+        setNeedsAccessToken(false);
+    }
+
     @Override
     public void onSave() {
         MySharedPreferences.getInstance().setTokens(getData().getAccessToken(), getData().getRefreshToken(), getData().getExpiresInSeconds());
