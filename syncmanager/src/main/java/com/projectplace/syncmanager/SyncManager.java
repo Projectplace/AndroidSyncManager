@@ -37,11 +37,11 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     private static final String TAG = SyncManager.class.getSimpleName();
     private boolean mLogSyncEvents;
 
-    private ArrayList<SyncObject> mFetchList = new ArrayList<>();
-    private ArrayList<SyncObject> mUploadList = new ArrayList<>();
-    private ArrayList<SyncObject.SyncListener> mSyncListeners = new ArrayList<>();
+    private final ArrayList<SyncObject> mFetchList = new ArrayList<>();
+    private final ArrayList<SyncObject> mUploadList = new ArrayList<>();
+    private final ArrayList<SyncObject.SyncListener> mSyncListeners = new ArrayList<>();
     private SyncObject.SyncListener mTestListener;
-    protected Context mApplicationContext;
+    protected final Context mApplicationContext;
 
     private final Object mSyncLock = new Object();
     private SyncThread mSyncThread;
