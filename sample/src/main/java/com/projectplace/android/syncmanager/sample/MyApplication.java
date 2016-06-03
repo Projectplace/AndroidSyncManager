@@ -1,9 +1,9 @@
-package com.projectplace.syncmanager.sample;
+package com.projectplace.android.syncmanager.sample;
 
 import android.app.Application;
 
-import com.projectplace.syncmanager.sample.sync.MySyncManager;
-import com.projectplace.syncmanager.sample.sync.TestApiService;
+import com.projectplace.android.syncmanager.sample.sync.MySyncManager;
+import com.projectplace.android.syncmanager.sample.sync.TestApiService;
 
 public class MyApplication extends Application {
 

@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager.sample.sync;
+package com.projectplace.android.syncmanager.sample.sync;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -8,12 +8,12 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
-import com.projectplace.syncmanager.SyncManager;
-import com.projectplace.syncmanager.SyncObject;
-import com.projectplace.syncmanager.sample.MyApplication;
-import com.projectplace.syncmanager.sample.MySharedPreferences;
-import com.projectplace.syncmanager.sample.R;
-import com.projectplace.syncmanager.sample.models.LoginResponse;
+import com.projectplace.android.syncmanager.SyncManager;
+import com.projectplace.android.syncmanager.SyncObject;
+import com.projectplace.android.syncmanager.sample.MyApplication;
+import com.projectplace.android.syncmanager.sample.MySharedPreferences;
+import com.projectplace.android.syncmanager.sample.R;
+import com.projectplace.android.syncmanager.sample.models.LoginResponse;
 
 import java.util.concurrent.TimeUnit;
 

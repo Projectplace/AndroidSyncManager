@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager;
+package com.projectplace.android.syncmanager;
 
 public abstract class SyncUpload extends SyncObject {
     private Runnable mExtraPrepare;

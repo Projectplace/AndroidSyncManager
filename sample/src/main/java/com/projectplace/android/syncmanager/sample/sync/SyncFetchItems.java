@@ -1,9 +1,9 @@
-package com.projectplace.syncmanager.sample.sync;
+package com.projectplace.android.syncmanager.sample.sync;
 
-import com.projectplace.syncmanager.SyncFetch;
-import com.projectplace.syncmanager.sample.MyApplication;
-import com.projectplace.syncmanager.sample.MySharedPreferences;
-import com.projectplace.syncmanager.sample.models.Item;
+import com.projectplace.android.syncmanager.SyncFetch;
+import com.projectplace.android.syncmanager.sample.MyApplication;
+import com.projectplace.android.syncmanager.sample.MySharedPreferences;
+import com.projectplace.android.syncmanager.sample.models.Item;
 
 import java.util.ArrayList;
 import java.util.List;

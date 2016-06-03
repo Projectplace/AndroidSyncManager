@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager.sample.models;
+package com.projectplace.android.syncmanager.sample.models;
 
 public class Item {
     private String mName;

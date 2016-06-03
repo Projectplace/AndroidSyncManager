@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager;
+package com.projectplace.android.syncmanager;
 
 /**
  * A simple variant of a fetch. This class can be overridden if the fetch only downloads one object

@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager;
+package com.projectplace.android.syncmanager.sample;
 
 import org.junit.Test;
 

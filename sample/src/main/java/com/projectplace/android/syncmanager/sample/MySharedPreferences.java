@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager.sample;
+package com.projectplace.android.syncmanager.sample;
 
 import android.content.Context;
 import android.content.SharedPreferences;

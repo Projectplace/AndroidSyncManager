@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager.sample;
+package com.projectplace.android.syncmanager.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -6,14 +6,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.projectplace.syncmanager.SyncFetch;
-import com.projectplace.syncmanager.SyncObject;
-import com.projectplace.syncmanager.SyncUpload;
-import com.projectplace.syncmanager.sample.models.Item;
-import com.projectplace.syncmanager.sample.sync.MySyncManager;
-import com.projectplace.syncmanager.sample.sync.SyncFetchItems;
-import com.projectplace.syncmanager.sample.sync.SyncFetchLogin;
-import com.projectplace.syncmanager.sample.sync.SyncUploadItem;
+import com.projectplace.android.syncmanager.SyncFetch;
+import com.projectplace.android.syncmanager.SyncObject;
+import com.projectplace.android.syncmanager.SyncUpload;
+import com.projectplace.android.syncmanager.sample.models.Item;
+import com.projectplace.android.syncmanager.sample.sync.MySyncManager;
+import com.projectplace.android.syncmanager.sample.sync.SyncFetchItems;
+import com.projectplace.android.syncmanager.sample.sync.SyncFetchLogin;
+import com.projectplace.android.syncmanager.sample.sync.SyncUploadItem;
 
 import java.util.ArrayList;
 import java.util.List;

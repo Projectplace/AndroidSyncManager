@@ -1,9 +1,9 @@
-package com.projectplace.syncmanager.sample.sync;
+package com.projectplace.android.syncmanager.sample.sync;
 
-import com.projectplace.syncmanager.SyncFetchSimple;
-import com.projectplace.syncmanager.sample.MyApplication;
-import com.projectplace.syncmanager.sample.MySharedPreferences;
-import com.projectplace.syncmanager.sample.models.LoginResponse;
+import com.projectplace.android.syncmanager.SyncFetchSimple;
+import com.projectplace.android.syncmanager.sample.MyApplication;
+import com.projectplace.android.syncmanager.sample.MySharedPreferences;
+import com.projectplace.android.syncmanager.sample.models.LoginResponse;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;

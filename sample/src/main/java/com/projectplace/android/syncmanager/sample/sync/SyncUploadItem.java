@@ -1,8 +1,8 @@
-package com.projectplace.syncmanager.sample.sync;
+package com.projectplace.android.syncmanager.sample.sync;
 
-import com.projectplace.syncmanager.SyncUpload;
-import com.projectplace.syncmanager.sample.MyApplication;
-import com.projectplace.syncmanager.sample.models.Item;
+import com.projectplace.android.syncmanager.SyncUpload;
+import com.projectplace.android.syncmanager.sample.MyApplication;
+import com.projectplace.android.syncmanager.sample.models.Item;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;

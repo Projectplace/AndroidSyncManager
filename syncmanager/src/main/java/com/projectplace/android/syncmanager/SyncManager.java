@@ -1,4 +1,4 @@
-package com.projectplace.syncmanager;
+package com.projectplace.android.syncmanager;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -143,7 +143,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     /**
      * Sets a listener to get callbacks when sync objects are finished.
      *
-     * @see {@link com.projectplace.syncmanager.SyncObject.SyncListener}
+     * @see {@link com.projectplace.android.syncmanager.SyncObject.SyncListener}
      */
     public void registerSyncListener(@NonNull SyncObject.SyncListener listener) {
         if (mSyncListeners.indexOf(listener) == -1) {

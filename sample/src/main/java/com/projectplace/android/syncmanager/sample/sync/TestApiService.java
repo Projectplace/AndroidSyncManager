@@ -1,7 +1,7 @@
-package com.projectplace.syncmanager.sample.sync;
+package com.projectplace.android.syncmanager.sample.sync;
 
-import com.projectplace.syncmanager.sample.models.Item;
-import com.projectplace.syncmanager.sample.models.LoginResponse;
+import com.projectplace.android.syncmanager.sample.models.Item;
+import com.projectplace.android.syncmanager.sample.models.LoginResponse;
 
 import java.util.ArrayList;
 import java.util.List;
