@@ -1,5 +1,7 @@
 package com.projectplace.syncmanager;
 
+import android.support.annotation.NonNull;
+
 public abstract class SyncFetch extends SyncObject {
 
     private boolean mShouldReset;
@@ -51,7 +53,7 @@ public abstract class SyncFetch extends SyncObject {
      * @param object the sync object to check if it is identical
      * @return true if the sync object will fetch the same data
      */
-    public boolean willFetchSameData(SyncFetch object) {
+    public boolean willFetchSameData(@NonNull SyncFetch object) {
         return false;
     }
 }

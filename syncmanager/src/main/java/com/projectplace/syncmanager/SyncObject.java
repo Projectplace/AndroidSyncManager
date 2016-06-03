@@ -1,5 +1,7 @@
 package com.projectplace.syncmanager;
 
+import android.support.annotation.NonNull;
+
 /**
  * Top class of both fetch and upload sync objects.
  */
@@ -39,7 +41,7 @@ public abstract class SyncObject {
 
     public abstract boolean isDone();
 
-    void setManagerSyncListener(SyncListener listener) {
+    void setManagerSyncListener(@NonNull SyncListener listener) {
         mManagerSyncListener = listener;
     }
 
@@ -114,6 +116,8 @@ public abstract class SyncObject {
     }
 
     public <T> T getError() {
+        // This will crash if the called tries to cast to wrong class type, but that is the callers responsibility
+        //noinspection unchecked
         return (T) mError;
     }
 

@@ -3,6 +3,9 @@ package com.projectplace.syncmanager.sample.sync;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 import com.projectplace.syncmanager.SyncManager;
@@ -41,7 +44,7 @@ public class MySyncManager extends SyncManager {
     }
 
     @Override
-    protected boolean shouldSyncObject(SyncObject sync) {
+    protected boolean shouldSyncObject(@NonNull SyncObject sync) {
         // Here you can check for specific conditions or if a specific sync object is allowed to sync.
         // If the access tokens has been cleared no sync objects should be allowed to sync for example unless
         // it is a sync object which doesn't need an access token for example.
@@ -49,19 +52,27 @@ public class MySyncManager extends SyncManager {
             stopSync();
             // Could also trigger a log out of the app here as if you
             // have no tokens you will probably need to log in again.
+
+            // Need to post toast on main looper as this is called on background thread
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(mApplicationContext, "No access token", Toast.LENGTH_SHORT).show();
+                }
+            });
             return false;
         }
         return true;
     }
 
     @Override
-    protected boolean shouldRefreshAccessToken(SyncObject sync) {
+    protected boolean shouldRefreshAccessToken() {
         // Check if the access token has expired
         return MySharedPreferences.getInstance().getAccessTokenExpiresIn() < TimeUnit.HOURS.toSeconds(2);
     }
 
     @Override
-    protected void startRefreshAccessToken(final RefreshAccessTokenCallback callback) {
+    protected void startRefreshAccessToken(@NonNull final RefreshAccessTokenCallback callback) {
         // If the access token needs refreshing this method will be called, so refresh it here
         MyApplication.getApiService().getAccessToken("refresh_token", "clientId", "clientSecret",
                 MySharedPreferences.getInstance().getRefreshToken(), null, null, new Callback<LoginResponse>() {
@@ -79,12 +90,15 @@ public class MySyncManager extends SyncManager {
     }
 
     @Override
-    protected void showErrorMessage(String errorMessage) {
+    protected void showError(@NonNull SyncObject syncObject) {
+        String errorMessage = syncObject.getErrorMessage();
         // If no internet override the error message
         if (!isNetworkAvailable(mApplicationContext)) {
             errorMessage = mApplicationContext.getString(R.string.error_no_internet_connection);
         }
-        Toast.makeText(mApplicationContext, errorMessage, Toast.LENGTH_LONG).show();
+        if (errorMessage != null) {
+            Toast.makeText(mApplicationContext, errorMessage, Toast.LENGTH_LONG).show();
+        }
     }
 
     private boolean isNetworkAvailable(Context context) {

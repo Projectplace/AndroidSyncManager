@@ -42,7 +42,7 @@ public class SyncFetchItems extends SyncFetch {
 
             @Override
             public void failure(RetrofitError error) {
-                setError(error);
+                setErrorAndMessage(error, error.getMessage());
             }
         });
     }

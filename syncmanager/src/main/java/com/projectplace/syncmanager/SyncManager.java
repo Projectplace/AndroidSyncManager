@@ -2,6 +2,9 @@ package com.projectplace.syncmanager;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -9,6 +12,7 @@ import java.util.ArrayList;
 
 /**
  * Handles all sync requests that fetches and uploads data with the backend server.
+ *
  * Two list are managed, a fetch list and an upload list. All syncs are executed in parallel, however all fetches will
  * be blocked as long as there is an upload ongoing. This is to prevent any conflict of happening so the database ends
  * up in an incorrect state. If a fetch is already ongoing when an upload is added the fetch will be reset and restarted.
@@ -27,8 +31,7 @@ import java.util.ArrayList;
  * that is tied to the fragment.
  * <p/>
  * If the access token that is used to communicate with the backend needs to be refreshed then all sync objects are put
- * on hold until the token has been refreshed. Login and signup sync objects are exceptions as they don't need an access
- * token to work.
+ * on hold until the token has been refreshed.
  */
 public abstract class SyncManager implements SyncObject.SyncListener {
     private static final String TAG = SyncManager.class.getSimpleName();
@@ -50,13 +53,37 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         void accessTokenRefreshed(boolean success);
     }
 
-    protected abstract boolean shouldSyncObject(SyncObject sync);
+    /**
+     * Called just before a sync object is started to check for special conditions if the sync object
+     * should be started. This is always called on a background thread.
+     *
+     * @param sync The sync object that is about to start.
+     * @return True if the sync object should be started, otherwise False.
+     */
+    @WorkerThread
+    protected abstract boolean shouldSyncObject(@NonNull SyncObject sync);
 
-    protected abstract boolean shouldRefreshAccessToken(SyncObject sync);
+    /**
+     * Called just before a sync object that needs an access token is started to check if the access token needs to be
+     * refreshed first. If that is needed, {@link SyncManager#startRefreshAccessToken(RefreshAccessTokenCallback callback)}
+     * will be called directly and the sync object will be set on hold until that is done. This is always called on a
+     * background thread.
+     *
+     * @return True if the access token needs to be refreshed first.
+     */
+    @WorkerThread
+    protected abstract boolean shouldRefreshAccessToken();
 
-    protected abstract void startRefreshAccessToken(RefreshAccessTokenCallback callback);
+    /**
+     * Called when the access token needs to be refreshed. This is always called on a background thread.
+     *
+     * @param callback to be used to indicate that a refresh was successful or not. If the refresh failed
+     *                 another try will take place directly after.
+     */
+    @WorkerThread
+    protected abstract void startRefreshAccessToken(@NonNull RefreshAccessTokenCallback callback);
 
-    protected SyncManager(Context context) {
+    protected SyncManager(@NonNull Context context) {
         mApplicationContext = context.getApplicationContext();
     }
 
@@ -82,16 +109,19 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     }
 
     // For test purposes only
+    @VisibleForTesting
     void setTestListener(SyncObject.SyncListener testListener) {
         mTestListener = testListener;
     }
 
     // For test purposes only
+    @VisibleForTesting
     SyncObject.SyncListener getTestListener() {
         return mTestListener;
     }
 
     // For test purposes only
+    @VisibleForTesting
     void setTestDisableNewSyncObjects(boolean disable) {
         mTestDisableNewSyncObjects = disable;
     }
@@ -100,21 +130,37 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         mLogSyncEvents = enabled;
     }
 
+    /**
+     * The sync manager is designed to use an oauth access token flow by default, but
+     * you can disable this and the sync manager will ignore any access token handling.
+     *
+     * @param usesAccessToken False if the sync manager should ignore access token handling. Default is True.
+     */
     public void setUsesAccessToken(boolean usesAccessToken) {
         mUsesAccessToken = usesAccessToken;
     }
 
-    public void registerSyncListener(SyncObject.SyncListener listener) {
+    /**
+     * Sets a listener to get callbacks when sync objects are finished.
+     *
+     * @see {@link com.projectplace.syncmanager.SyncObject.SyncListener}
+     */
+    public void registerSyncListener(@NonNull SyncObject.SyncListener listener) {
         if (mSyncListeners.indexOf(listener) == -1) {
             mSyncListeners.add(listener);
         }
     }
 
-    public void unregisterSyncListener(SyncObject.SyncListener listener) {
+    /**
+     * Unregisters a sync listener.
+     *
+     * @see {@link SyncObject.SyncListener}
+     */
+    public void unregisterSyncListener(@NonNull SyncObject.SyncListener listener) {
         mSyncListeners.remove(listener);
     }
 
-    private boolean containsIdenticalFetch(SyncFetch fetch) {
+    private boolean containsIdenticalFetch(@NonNull SyncFetch fetch) {
         synchronized (mSyncLock) {
             for (int i = 0; i < mFetchList.size(); i++) {
                 SyncFetch tmpFetch = (SyncFetch) mFetchList.get(i);
@@ -126,7 +172,13 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
-    public void fetch(SyncFetch newFetch) {
+    /**
+     * Adds a fetch object to the sync queue. The fetch will be started as soon as possible.
+     * If an upload object is running it will hold until that is finished first.
+     *
+     * @see {@link SyncFetch}
+     */
+    public void fetch(@NonNull SyncFetch newFetch) {
         if (!mTestDisableNewSyncObjects) {
             synchronized (mSyncLock) {
                 syncLog("(Fetch) New " + newFetch.getClass().getSimpleName());
@@ -142,7 +194,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
-    private void resetFetches(SyncUpload newUpload) {
+    private void resetFetches(@NonNull SyncUpload newUpload) {
         for (SyncObject fetch : mFetchList) {
             if (newUpload.shouldResetFetch((SyncFetch) fetch)) {
                 ((SyncFetch) fetch).setShouldReset();
@@ -150,7 +202,12 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
-    public void upload(final SyncUpload newUpload) {
+    /**
+     * Adds an upload sync to the sync queue. The upload will be started as soon as possible.
+     *
+     * @see {@link SyncUpload}
+     */
+    public void upload(@NonNull final SyncUpload newUpload) {
         if (!mTestDisableNewSyncObjects) {
             synchronized (mSyncLock) {
                 syncLog("(Upload) New " + newUpload.getClass().getSimpleName());
@@ -180,8 +237,11 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
+    /**
+     * Internal callback when an upload is finished. This should never be called from outside of the sync manager.
+     */
     @Override
-    public void onUploadDone(final SyncUpload syncUpload) {
+    public void onUploadDone(@NonNull final SyncUpload syncUpload) {
         synchronized (mSyncLock) {
             syncLog("(onUploadDone) " + syncUpload.getClass().getSimpleName());
             mUploadList.remove(syncUpload);
@@ -194,9 +254,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                 for (SyncObject upload : mUploadList) {
                     conflict = ((SyncUpload) upload).hasConflict(syncUpload);
                 }
-                if (syncUpload.getErrorMessage() != null) {
-                    showErrorMessage(syncUpload.getErrorMessage());
-                }
+                showError(syncUpload);
             }
             final boolean shouldRevertIfFailed = !conflict;
 
@@ -242,8 +300,11 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         startSync();
     }
 
+    /**
+     * Internal callback when a fetch is finished. This should never be called from outside of the sync manager.
+     */
     @Override
-    public void onFetchDone(final SyncFetch syncFetch) {
+    public void onFetchDone(@NonNull final SyncFetch syncFetch) {
         // If sync is stopped we should not save anything
         if (mSyncStopped) {
             return;
@@ -262,9 +323,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                 synchronized (mSyncLock) {
                     mFetchList.remove(syncFetch);
                 }
-                if (syncFetch.getErrorMessage() != null) {
-                    showErrorMessage(syncFetch.getErrorMessage());
-                }
+                showError(syncFetch);
                 if (mTestListener != null) {
                     mTestListener.onFetchDone(syncFetch);
                 }
@@ -314,8 +373,16 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         syncLog("(onFetchDone) FetchList size: " + mFetchList.size());
     }
 
-    protected void showErrorMessage(String errorMessage) {
-        Toast.makeText(mApplicationContext, errorMessage, Toast.LENGTH_LONG).show();
+    /**
+     * By default a toast with the error message will be shown. This can however
+     * be overridden and a custom error can be displayed instead.
+     *
+     * @param syncObject The sync object which has failed for some reason.
+     */
+    protected void showError(@NonNull SyncObject syncObject) {
+        if (syncObject.getErrorMessage() != null) {
+            Toast.makeText(mApplicationContext, syncObject.getErrorMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -339,7 +406,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         } else {
                             mUploadList.remove(syncObject);
                         }
-                    } else if (mUsesAccessToken && syncObject != null && syncObject.needsAccessToken() && shouldRefreshAccessToken(syncObject)) {
+                    } else if (mUsesAccessToken && syncObject != null && syncObject.needsAccessToken() && shouldRefreshAccessToken()) {
                         syncLog("Sync Thread - Access token needs to be refreshed");
                         refreshAccessToken();
                     } else {
@@ -413,7 +480,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
-    private void syncLog(String message) {
+    private void syncLog(@NonNull String message) {
         if (mLogSyncEvents) {
             Log.d(TAG, message);
         }
