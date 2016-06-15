@@ -1,11 +1,18 @@
 # SyncManager
-A lightweight sync manager for short lived api calls.
+This sync manager is design to make short lived api calls, it is not designed to download huge documents that will take an hour to download.
 
 ## Features
-* TODO
+* Decouple sync handling from UI
+* Works great together with Retrofit and Android loaders
+* Run many uploads and fetches in parallel
+* Get callbacks to anywhere in the app about the sync object results
+* Revert handling if an upload fails
+* Conflict handling between uploads and fetches
+* Callbacks to refresh access tokens if needed before the sync object is run
 
 ## Download lib with gradle
 
+```gradle
     repositories {
         mavenCentral()
     }
@@ -13,6 +20,7 @@ A lightweight sync manager for short lived api calls.
     dependencies {
         compile 'com.projectplace.android:syncmanager:1.0'
     }
+```
 
 ## Usage
 TODO
