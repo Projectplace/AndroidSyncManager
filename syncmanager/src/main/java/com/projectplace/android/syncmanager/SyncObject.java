@@ -31,6 +31,10 @@ public abstract class SyncObject {
     private boolean mListenerCalled;
     private boolean mNeedsAccessToken = true;
 
+    /**
+     * Called when the sync object should save it synced data. This will always be called on a background thread
+     * so it is safe to call a database here.
+     */
     public abstract void onSave();
 
     /**
@@ -39,6 +43,10 @@ public abstract class SyncObject {
      */
     public abstract void onStart();
 
+    /**
+     * Should return true when the sync object is done with all syncing. After {@link #checkIfDone()} has been called this
+     * will be called to see if the sync object is done with its syncing.
+     */
     public abstract boolean isDone();
 
     void setManagerSyncListener(@NonNull SyncListener listener) {
@@ -62,11 +70,23 @@ public abstract class SyncObject {
         checkIfDone();
     }
 
+    /**
+     * Same as {@link #setError(Object)} but with a provided error message that will be shown as a toast.
+     *
+     * @param error An object of any kind that describes the error.
+     * @param errorMessage A message to be shown as a toast.
+     */
     protected void setErrorAndMessage(Object error, String errorMessage) {
         mErrorMessage = errorMessage;
         setError(error);
     }
 
+    /**
+     * If a sync fails an error object should be set which can later be retrieved with {@link #getError()}
+     * from a sync listener callback.
+     *
+     * @param error An object of any kind that describes the error.
+     */
     protected void setError(Object error) {
         mError = error;
         setFailed(true);
@@ -95,6 +115,9 @@ public abstract class SyncObject {
         return mSyncListener;
     }
 
+    /**
+     * Set if this sync object needs an access token to be able to sync. Default is true.
+     */
     protected void setNeedsAccessToken(boolean needsAccessToken) {
         mNeedsAccessToken = needsAccessToken;
     }

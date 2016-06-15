@@ -13,6 +13,9 @@ public abstract class SyncFetch extends SyncObject {
      */
     public abstract void onReset();
 
+    /**
+     * Set number of tries this sync fetch should try again if it fails to sync.
+     */
     public void setRetries(int retries) {
         mRetries = retries;
     }
