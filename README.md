@@ -83,6 +83,12 @@ For an upload the main methods to implement are.
      * After an upload is done this will be called. This can be overridden if any database operations is needed after the upload.
      */
     public void onSave();
+
+    /**
+     * Called when this sync object should start. The sync that is started should always be started on a
+     * new thread to not block other sync objects to run in parallel as this is called from the sync loop thread.
+     */
+    public abstract void onStart();
 ```
 
 #### SyncFetch
@@ -95,16 +101,16 @@ For a fetch the main methods to implement are.
     public abstract void onSave();
 
     /**
-     * Called when this sync object should start. The sync that is started should always be started on a
-     * new thread to not block other sync objects to run in parallel as this is called from the sync loop thread.
-     */
-    public abstract void onStart();
-
-    /**
      * Should return true when the sync object is done with all syncing. After {@link #checkIfDone()} has been called this
      * will be called to see if the sync object is done with its syncing.
      */
     public abstract boolean isDone();
+
+    /**
+     * Called when this sync object should start. The sync that is started should always be started on a
+     * new thread to not block other sync objects to run in parallel as this is called from the sync loop thread.
+     */
+    public abstract void onStart();
 ```
 
 #### Queue and listen
