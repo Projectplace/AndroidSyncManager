@@ -132,15 +132,15 @@ To queue a sync object and listen to the result do the following
 ```
 
 ## Read the source documentation
-All important methods are documented. Check them out here.
-[com.projectplace.android.syncmanager.SyncManager](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncManager.java)
-[com.projectplace.android.syncmanager.SyncObject](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncObject.java)
-[com.projectplace.android.syncmanager.SyncUpload](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncUpload.java)
-[com.projectplace.android.syncmanager.SyncFetch](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetch.java)
-[com.projectplace.android.syncmanager.SyncFetchSimple](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetchSimple.java)
+All important methods are documented. Check them out here.<br/>
+[com.projectplace.android.syncmanager.SyncManager](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncManager.java)<br/>
+[com.projectplace.android.syncmanager.SyncObject](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncObject.java)<br/>
+[com.projectplace.android.syncmanager.SyncUpload](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncUpload.java)<br/>
+[com.projectplace.android.syncmanager.SyncFetch](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetch.java)<br/>
+[com.projectplace.android.syncmanager.SyncFetchSimple](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetchSimple.java)<br/>
 
-Check out the sample app
-[Sample app](https://github.com/Projectplace/AndroidSyncManager/tree/master/sample/src/main/java/com/projectplace/android/syncmanager/sample)
+Check out the sample app<br/>
+[Sample app](https://github.com/Projectplace/AndroidSyncManager/tree/master/sample/src/main/java/com/projectplace/android/syncmanager/sample)<br/>
 
 ## License
     Copyright 2016 Projectplace
