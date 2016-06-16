@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SyncObject.SyncLi
     public void onUploadDone(SyncUpload syncUpload) {
         if (syncUpload instanceof SyncUploadItem) {
             if (syncUpload.isSuccess()) {
+                // Normally the items would have been save to DB and loaded by a Loader, but for test just add them here
                 Item item = ((SyncUploadItem) syncUpload).getItem();
                 mItemList.add(item);
                 Toast.makeText(this, String.format("Item added: %s", item.getName()), Toast.LENGTH_SHORT).show();

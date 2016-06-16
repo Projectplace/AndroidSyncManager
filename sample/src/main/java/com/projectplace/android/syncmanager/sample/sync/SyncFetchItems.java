@@ -28,7 +28,7 @@ public class SyncFetchItems extends SyncFetch {
 
     @Override
     public void onSave() {
-        // Save to database for example
+        // Here you should save the items to the database and that should trigger a loader to update the UI
     }
 
     @Override

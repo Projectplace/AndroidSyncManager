@@ -68,7 +68,7 @@ public abstract class SyncUpload extends SyncObject {
     }
 
     /**
-     * This method should be overridden in uploads that use the revert mechanism.
+     * This method could be overridden in uploads that use the revert mechanism.
      * If several upload operations of the same type is running the revert values will change depending on what happens.
      * <p/>
      * For example, if the a text is changed two time in a row quickly on a slow network this is what will happen.
