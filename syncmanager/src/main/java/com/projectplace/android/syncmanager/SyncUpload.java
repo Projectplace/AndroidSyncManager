@@ -1,5 +1,8 @@
 package com.projectplace.android.syncmanager;
 
+/**
+ * This class should be subclassed for all sync requests that uploads data.
+ */
 public abstract class SyncUpload extends SyncObject {
     private Runnable mExtraPrepare;
     private Runnable mExtraRevert;

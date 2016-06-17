@@ -2,6 +2,9 @@ package com.projectplace.android.syncmanager;
 
 import android.support.annotation.NonNull;
 
+/**
+ * This class should be subclassed for all sync requests that fetches data.
+ */
 public abstract class SyncFetch extends SyncObject {
 
     private boolean mShouldReset;
