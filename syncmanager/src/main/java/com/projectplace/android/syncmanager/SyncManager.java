@@ -110,19 +110,19 @@ public abstract class SyncManager implements SyncObject.SyncListener {
 
     // For test purposes only
     @VisibleForTesting
-    void setTestListener(SyncObject.SyncListener testListener) {
+    public void setTestListener(SyncObject.SyncListener testListener) {
         mTestListener = testListener;
     }
 
     // For test purposes only
     @VisibleForTesting
-    SyncObject.SyncListener getTestListener() {
+    public SyncObject.SyncListener getTestListener() {
         return mTestListener;
     }
 
     // For test purposes only
     @VisibleForTesting
-    void setTestDisableNewSyncObjects(boolean disable) {
+    public void setTestDisableNewSyncObjects(boolean disable) {
         mTestDisableNewSyncObjects = disable;
     }
 
