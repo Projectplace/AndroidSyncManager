@@ -387,13 +387,19 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
+    private void syncLog(@NonNull String message) {
+        if (mLogSyncEvents) {
+            Log.d(TAG, message);
+        }
+    }
+
     /**
      * The sync thread will start sync objects as soon as it is added to the sync manager. However, fetch objects will
      * not be started until all upload objects has finished. This is because we want to minimize the risk of conflicts
      * between uploads and fetches. If no sync objects exists the sync thread pauses and waits for a new sync object.
      */
     private class SyncThread extends Thread {
-        private boolean mRefreshingAccessToken;
+        private RefreshAccessTokenThread mRefreshAccessTokenThread;
 
         @Override
         public void run() {
@@ -410,7 +416,27 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         }
                     } else if (mUsesAccessToken && syncObject != null && syncObject.needsAccessToken() && shouldRefreshAccessToken()) {
                         syncLog("Sync Thread - Access token needs to be refreshed");
-                        refreshAccessToken();
+                        if (mRefreshAccessTokenThread == null) {
+                            mRefreshAccessTokenThread = new RefreshAccessTokenThread(new RefreshAccessTokenCallback() {
+                                @Override
+                                public void refreshAccessTokenSuccess() {
+                                    mRefreshAccessTokenThread = null;
+                                    synchronized (mSyncLock) {
+                                        mSyncLock.notify();
+                                    }
+                                }
+
+                                @Override
+                                public void refreshAccessTokenFailed(Object error) {
+                                    mRefreshAccessTokenThread = null;
+                                    failSyncObjectsThatNeedAccessToken(error);
+                                }
+                            });
+                            mRefreshAccessTokenThread.start();
+                        } else {
+                            syncLog("Sync Thread - Refresh access token already in progress");
+                        }
+                        waitSyncLock("Sync Thread - Wait for refresh access token to finish");
                     } else {
                         if (syncObject != null) {
                             syncLog("Sync Thread - Start sync object: " + syncObject.getClass().getSimpleName());
@@ -418,52 +444,20 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         }
 
                         if (!mSyncStopped && getNextSyncObject() == null) {
-                            try {
-                                syncLog("Sync Thread - Wait for sync objects");
-                                mSyncLock.wait();
-                            } catch (InterruptedException e) {
-                                syncLog("Sync Thread - Interrupted");
-                                e.printStackTrace();
-                            }
+                            waitSyncLock("Sync Thread - Wait for sync objects");
                         }
                     }
                 }
             }
         }
 
-        private void refreshAccessToken() {
-            if (!mRefreshingAccessToken) {
-                syncLog("Sync Thread - Refreshing access token");
-                mRefreshingAccessToken = true;
-                startRefreshAccessToken(new RefreshAccessTokenCallback() {
-                    @Override
-                    public void refreshAccessTokenSuccess() {
-                        syncLog("Sync Thread - Access token refresh success");
-                        mRefreshingAccessToken = false;
-                        synchronized (mSyncLock) {
-                            mSyncLock.notify();
-                        }
-                    }
-
-                    @Override
-                    public void refreshAccessTokenFailed(final Object error) {
-                        syncLog("Sync Thread - Access token refresh failed");
-                        mRefreshingAccessToken = false;
-                        failSyncObjectsThatNeedAccessToken(error);
-                    }
-                });
-            } else {
-                syncLog("Sync Thread - Refresh access token already in progress");
-            }
-
-            if (mRefreshingAccessToken) {
-                try {
-                    syncLog("Sync Thread - Wait for refresh access token to finish");
-                    mSyncLock.wait();
-                } catch (InterruptedException e) {
-                    syncLog("Sync Thread - Interrupted");
-                    e.printStackTrace();
-                }
+        private void waitSyncLock(String logMessage) {
+            try {
+                syncLog(logMessage);
+                mSyncLock.wait();
+            } catch (InterruptedException e) {
+                syncLog("Sync Thread - Interrupted");
+                e.printStackTrace();
             }
         }
 
@@ -471,6 +465,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
             synchronized (mSyncLock) {
                 for (SyncObject upload : mUploadList) {
                     if (upload.needsAccessToken()) {
+                        upload.start();
                         upload.setError(error);
                     }
                 }
@@ -504,9 +499,90 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
     }
 
-    private void syncLog(@NonNull String message) {
-        if (mLogSyncEvents) {
-            Log.d(TAG, message);
+    private class RefreshAccessTokenThread extends Thread {
+        private static final int MAX_REFRESH_TRIES = 3;
+        private static final int RESCHEDULE_BASE_TIME = 3000;
+
+        private final Object mRefreshLock = new Object();
+        private RefreshAccessTokenCallback mCallback;
+        private boolean mRefreshDone;
+        private boolean mRefreshing;
+        private int mRefreshTries;
+
+        public RefreshAccessTokenThread(RefreshAccessTokenCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void run() {
+            while (!mRefreshDone) {
+                refresh();
+                waitThread();
+            }
+            syncLog("RefreshAccessTokenThread - Thread ending");
+        }
+
+        private void refresh() {
+            if (mRefreshing) {
+                return;
+            }
+
+            mRefreshTries++;
+            mRefreshing = true;
+            syncLog("RefreshAccessTokenThread - Refreshing access token try number: " + mRefreshTries);
+            startRefreshAccessToken(new RefreshAccessTokenCallback() {
+                @Override
+                public void refreshAccessTokenSuccess() {
+                    syncLog("RefreshAccessTokenThread - Access token refresh success");
+                    mRefreshDone = true;
+                    mCallback.refreshAccessTokenSuccess();
+                    notifyThread();
+                }
+
+                @Override
+                public void refreshAccessTokenFailed(final Object error) {
+                    syncLog("RefreshAccessTokenThread - Access token refresh failed");
+                    if (mRefreshTries >= MAX_REFRESH_TRIES) {
+                        mRefreshDone = true;
+                        mCallback.refreshAccessTokenFailed(error);
+                        notifyThread();
+                    } else {
+                        int nextTryIn = mRefreshTries * RESCHEDULE_BASE_TIME;
+                        syncLog("RefreshAccessTokenThread - Scheduling a new try in " + nextTryIn + " milliseconds");
+                        mRefreshing = false;
+                        waitThread(nextTryIn);
+                    }
+                }
+            });
+        }
+
+        private void waitThread(long millis) {
+            synchronized (mRefreshLock) {
+                try {
+                    mRefreshLock.wait(millis);
+                    notifyThread();
+                } catch (InterruptedException e) {
+                    syncLog("RefreshAccessTokenThread - Interrupted");
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private void waitThread() {
+            synchronized (mRefreshLock) {
+                try {
+                    mRefreshLock.wait();
+                } catch (InterruptedException e) {
+                    syncLog("RefreshAccessTokenThread - Interrupted");
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private void notifyThread() {
+            synchronized (mRefreshLock) {
+                mRefreshLock.notify();
+            }
         }
     }
 }

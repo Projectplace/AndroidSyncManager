@@ -143,7 +143,8 @@ public abstract class SyncObject {
     }
 
     public boolean isStarted() {
-        return mStarted;
+        // It is seen as started if set to started or set to failed
+        return mStarted || mFailed;
     }
 
     public boolean isFailed() {
