@@ -1,5 +1,7 @@
 package com.projectplace.android.syncmanager;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 
 /**
@@ -73,7 +75,7 @@ public abstract class SyncObject {
     /**
      * Same as {@link #setError(Object)} but with a provided error message that will be shown as a toast.
      *
-     * @param error An object of any kind that describes the error.
+     * @param error        An object of any kind that describes the error.
      * @param errorMessage A message to be shown as a toast.
      */
     protected void setErrorAndMessage(Object error, String errorMessage) {
@@ -99,11 +101,25 @@ public abstract class SyncObject {
     protected void checkIfDone() {
         if ((isFailed() || isDone()) && !mListenerCalled) {
             mListenerCalled = true;
-            if (this instanceof SyncFetch) {
-                mManagerSyncListener.onFetchDone((SyncFetch) this);
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                syncDone();
             } else {
-                mManagerSyncListener.onUploadDone((SyncUpload) this);
+                // Callback should always be done on the main thread to be able to manipulate the UI in the callback
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        syncDone();
+                    }
+                });
             }
+        }
+    }
+
+    private void syncDone() {
+        if (SyncObject.this instanceof SyncFetch) {
+            mManagerSyncListener.onFetchDone((SyncFetch) SyncObject.this);
+        } else {
+            mManagerSyncListener.onUploadDone((SyncUpload) SyncObject.this);
         }
     }
 

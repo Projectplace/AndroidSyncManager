@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 /**
  * Handles all sync requests that fetches and uploads data with the backend server.
- *
+ * <p/>
  * Two list are managed, a fetch list and an upload list. All syncs are executed in parallel, however all fetches will
  * be blocked as long as there is an upload ongoing. This is to prevent any conflict of happening so the database ends
  * up in an incorrect state. If a fetch is already ongoing when an upload is added the fetch will be reset and restarted.
@@ -50,7 +50,9 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     private boolean mTestDisableNewSyncObjects;
 
     public interface RefreshAccessTokenCallback {
-        void accessTokenRefreshed(boolean success);
+        void refreshAccessTokenSuccess();
+
+        void refreshAccessTokenFailed(Object error);
     }
 
     /**
@@ -435,12 +437,19 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                 mRefreshingAccessToken = true;
                 startRefreshAccessToken(new RefreshAccessTokenCallback() {
                     @Override
-                    public void accessTokenRefreshed(boolean success) {
-                        syncLog("Sync Thread - Access token refresh done. Success = " + success);
+                    public void refreshAccessTokenSuccess() {
+                        syncLog("Sync Thread - Access token refresh success");
+                        mRefreshingAccessToken = false;
                         synchronized (mSyncLock) {
                             mSyncLock.notify();
                         }
+                    }
+
+                    @Override
+                    public void refreshAccessTokenFailed(final Object error) {
+                        syncLog("Sync Thread - Access token refresh failed");
                         mRefreshingAccessToken = false;
+                        failSyncObjectsThatNeedAccessToken(error);
                     }
                 });
             } else {
@@ -454,6 +463,21 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                 } catch (InterruptedException e) {
                     syncLog("Sync Thread - Interrupted");
                     e.printStackTrace();
+                }
+            }
+        }
+
+        private void failSyncObjectsThatNeedAccessToken(Object error) {
+            synchronized (mSyncLock) {
+                for (SyncObject upload : mUploadList) {
+                    if (upload.needsAccessToken()) {
+                        upload.setError(error);
+                    }
+                }
+                for (SyncObject fetch : mFetchList) {
+                    if (fetch.needsAccessToken()) {
+                        fetch.setError(error);
+                    }
                 }
             }
         }

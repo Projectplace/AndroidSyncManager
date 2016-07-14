@@ -79,12 +79,12 @@ public class MySyncManager extends SyncManager {
                     @Override
                     public void success(LoginResponse loginResponse, Response response) {
                         MySharedPreferences.getInstance().setTokens(loginResponse.getAccessToken(), loginResponse.getRefreshToken(), loginResponse.getExpiresInSeconds());
-                        callback.accessTokenRefreshed(true);
+                        callback.refreshAccessTokenSuccess();
                     }
 
                     @Override
                     public void failure(RetrofitError error) {
-                        callback.accessTokenRefreshed(false);
+                        callback.refreshAccessTokenFailed(error);
                     }
                 });
     }
