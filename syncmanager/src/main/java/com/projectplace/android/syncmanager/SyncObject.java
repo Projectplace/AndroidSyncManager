@@ -101,7 +101,8 @@ public abstract class SyncObject {
     protected void checkIfDone() {
         if ((isFailed() || isDone()) && !mListenerCalled) {
             mListenerCalled = true;
-            if (Looper.myLooper() == Looper.getMainLooper()) {
+            // If test listener is set then don't post to main thread as that will cause deadlock in tests
+            if (Looper.myLooper() == Looper.getMainLooper() || SyncManager.getTestListener() != null) {
                 syncDone();
             } else {
                 // Callback should always be done on the main thread to be able to manipulate the UI in the callback
@@ -116,10 +117,10 @@ public abstract class SyncObject {
     }
 
     private void syncDone() {
-        if (SyncObject.this instanceof SyncFetch) {
-            mManagerSyncListener.onFetchDone((SyncFetch) SyncObject.this);
+        if (this instanceof SyncFetch) {
+            mManagerSyncListener.onFetchDone((SyncFetch) this);
         } else {
-            mManagerSyncListener.onUploadDone((SyncUpload) SyncObject.this);
+            mManagerSyncListener.onUploadDone((SyncUpload) this);
         }
     }
 

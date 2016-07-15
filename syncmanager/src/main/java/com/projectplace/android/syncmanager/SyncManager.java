@@ -40,14 +40,16 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     private final ArrayList<SyncObject> mFetchList = new ArrayList<>();
     private final ArrayList<SyncObject> mUploadList = new ArrayList<>();
     private final ArrayList<SyncObject.SyncListener> mSyncListeners = new ArrayList<>();
-    private SyncObject.SyncListener mTestListener;
     protected final Context mApplicationContext;
 
     private final Object mSyncLock = new Object();
     private SyncThread mSyncThread;
     private boolean mUsesAccessToken = true;
     private boolean mSyncStopped;
-    private boolean mTestDisableNewSyncObjects;
+
+    // Test variables are static to be able to do special handling in SyncObject
+    private static SyncObject.SyncListener sTestListener;
+    private static boolean sTestDisableNewSyncObjects;
 
     public interface RefreshAccessTokenCallback {
         void refreshAccessTokenSuccess();
@@ -80,7 +82,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * Called when the access token needs to be refreshed. This is always called on a background thread.
      *
      * @param callback to be used to indicate that a refresh was successful or not. If the refresh failed
-     *                 another try will take place directly after.
+     *                 another try will take place with a back off algorithm. Max three tries until it gives up.
      */
     @WorkerThread
     protected abstract void startRefreshAccessToken(@NonNull RefreshAccessTokenCallback callback);
@@ -112,20 +114,20 @@ public abstract class SyncManager implements SyncObject.SyncListener {
 
     // For test purposes only
     @VisibleForTesting
-    public void setTestListener(SyncObject.SyncListener testListener) {
-        mTestListener = testListener;
+    public static void setTestListener(SyncObject.SyncListener testListener) {
+        sTestListener = testListener;
     }
 
     // For test purposes only
     @VisibleForTesting
-    public SyncObject.SyncListener getTestListener() {
-        return mTestListener;
+    public static SyncObject.SyncListener getTestListener() {
+        return sTestListener;
     }
 
     // For test purposes only
     @VisibleForTesting
-    public void setTestDisableNewSyncObjects(boolean disable) {
-        mTestDisableNewSyncObjects = disable;
+    public static void setTestDisableNewSyncObjects(boolean disable) {
+        sTestDisableNewSyncObjects = disable;
     }
 
     public void setLogsEnabled(boolean enabled) {
@@ -181,7 +183,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * @see {@link SyncFetch}
      */
     public void fetch(@NonNull SyncFetch newFetch) {
-        if (!mTestDisableNewSyncObjects) {
+        if (!sTestDisableNewSyncObjects) {
             synchronized (mSyncLock) {
                 syncLog("(Fetch) New " + newFetch.getClass().getSimpleName());
                 // If there already exists an identical fetch object in the fetch list then don't add it to gain performance.
@@ -210,7 +212,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * @see {@link SyncUpload}
      */
     public void upload(@NonNull final SyncUpload newUpload) {
-        if (!mTestDisableNewSyncObjects) {
+        if (!sTestDisableNewSyncObjects) {
             synchronized (mSyncLock) {
                 syncLog("(Upload) New " + newUpload.getClass().getSimpleName());
                 newUpload.setManagerSyncListener(this);
@@ -282,8 +284,8 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         syncUpload.onSave();
                     }
 
-                    if (mTestListener != null) {
-                        mTestListener.onUploadDone(syncUpload);
+                    if (sTestListener != null) {
+                        sTestListener.onUploadDone(syncUpload);
                     }
                     return null;
                 }
@@ -326,8 +328,8 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     mFetchList.remove(syncFetch);
                 }
                 showError(syncFetch);
-                if (mTestListener != null) {
-                    mTestListener.onFetchDone(syncFetch);
+                if (sTestListener != null) {
+                    sTestListener.onFetchDone(syncFetch);
                 }
                 for (SyncObject.SyncListener listener : mSyncListeners) {
                     listener.onFetchDone(syncFetch);
@@ -348,8 +350,8 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         protected Void doInBackground(Void... params) {
                             syncFetch.onSave();
                             // Test listener needs to be called on background thread
-                            if (mTestListener != null) {
-                                mTestListener.onFetchDone(syncFetch);
+                            if (sTestListener != null) {
+                                sTestListener.onFetchDone(syncFetch);
                             }
                             return null;
                         }
