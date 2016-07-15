@@ -421,9 +421,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                                 @Override
                                 public void refreshAccessTokenSuccess() {
                                     mRefreshAccessTokenThread = null;
-                                    synchronized (mSyncLock) {
-                                        mSyncLock.notify();
-                                    }
+                                    notifySyncLock();
                                 }
 
                                 @Override
@@ -448,16 +446,6 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         }
                     }
                 }
-            }
-        }
-
-        private void waitSyncLock(String logMessage) {
-            try {
-                syncLog(logMessage);
-                mSyncLock.wait();
-            } catch (InterruptedException e) {
-                syncLog("Sync Thread - Interrupted");
-                e.printStackTrace();
             }
         }
 
@@ -497,8 +485,29 @@ public abstract class SyncManager implements SyncObject.SyncListener {
             }
             return null;
         }
+
+        private void waitSyncLock(String logMessage) {
+            try {
+                syncLog(logMessage);
+                mSyncLock.wait();
+            } catch (InterruptedException e) {
+                syncLog("Sync Thread - Interrupted");
+                e.printStackTrace();
+            }
+        }
+
+        private void notifySyncLock() {
+            synchronized (mSyncLock) {
+                mSyncLock.notify();
+            }
+        }
     }
 
+    /**
+     * This thread is used to refresh the access token independent from the sync thread. The sync thread will wait
+     * for a callback from this thread to know if the refresh was successful or not. As long as this thread tries to
+     * refresh the access token the sync thread will not let any sync objects through that needs an access token.
+     */
     private class RefreshAccessTokenThread extends Thread {
         private static final int MAX_REFRESH_TRIES = 3;
         private static final int RESCHEDULE_BASE_TIME = 3000;
@@ -517,7 +526,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         public void run() {
             while (!mRefreshDone) {
                 refresh();
-                waitThread();
+                waitRefreshLock();
             }
             syncLog("RefreshAccessTokenThread - Thread ending");
         }
@@ -536,7 +545,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     syncLog("RefreshAccessTokenThread - Access token refresh success");
                     mRefreshDone = true;
                     mCallback.refreshAccessTokenSuccess();
-                    notifyThread();
+                    notifyRefreshLock();
                 }
 
                 @Override
@@ -545,22 +554,22 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     if (mRefreshTries >= MAX_REFRESH_TRIES) {
                         mRefreshDone = true;
                         mCallback.refreshAccessTokenFailed(error);
-                        notifyThread();
+                        notifyRefreshLock();
                     } else {
                         int nextTryIn = mRefreshTries * RESCHEDULE_BASE_TIME;
                         syncLog("RefreshAccessTokenThread - Scheduling a new try in " + nextTryIn + " milliseconds");
                         mRefreshing = false;
-                        waitThread(nextTryIn);
+                        waitRefreshLock(nextTryIn);
                     }
                 }
             });
         }
 
-        private void waitThread(long millis) {
+        private void waitRefreshLock(long millis) {
             synchronized (mRefreshLock) {
                 try {
                     mRefreshLock.wait(millis);
-                    notifyThread();
+                    notifyRefreshLock();
                 } catch (InterruptedException e) {
                     syncLog("RefreshAccessTokenThread - Interrupted");
                     e.printStackTrace();
@@ -568,7 +577,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
             }
         }
 
-        private void waitThread() {
+        private void waitRefreshLock() {
             synchronized (mRefreshLock) {
                 try {
                     mRefreshLock.wait();
@@ -579,7 +588,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
             }
         }
 
-        private void notifyThread() {
+        private void notifyRefreshLock() {
             synchronized (mRefreshLock) {
                 mRefreshLock.notify();
             }
