@@ -43,8 +43,15 @@ public class TestApiService {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                // Return the test items
-                cb.success(mTestItems, mOkResponse);
+                // Call server to get items here
+
+                // Simulate retrofit and post back on main thread
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cb.success(mTestItems, mOkResponse);
+                    }
+                });
             }
         }).start();
     }
@@ -53,9 +60,17 @@ public class TestApiService {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Item item = new Item(itemName);
-                mTestItems.add(item);
-                cb.success(item, mOkResponse);
+                // Call server to add items here
+
+                // Simulate retrofit and post back on main thread
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Item item = new Item(itemName);
+                        mTestItems.add(item);
+                        cb.success(item, mOkResponse);
+                    }
+                });
             }
         }).start();
     }
