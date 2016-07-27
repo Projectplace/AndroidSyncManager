@@ -1,5 +1,8 @@
 package com.projectplace.android.syncmanager.sample.sync;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.projectplace.android.syncmanager.sample.models.Item;
 import com.projectplace.android.syncmanager.sample.models.LoginResponse;
 
@@ -20,11 +23,18 @@ public class TestApiService {
             @Override
             public void run() {
                 // Call oauth service in real app, here just return some test tokens
-                LoginResponse loginResponse = new LoginResponse();
+                final LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setAccessToken("abcdefghijklmno");
                 loginResponse.setRefreshToken("jkndgjsdnfkrios");
                 loginResponse.setExpiresInSeconds(TimeUnit.HOURS.toSeconds(5));
-                cb.success(loginResponse, mOkResponse);
+
+                // Simulate retrofit and post back on main thread
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cb.success(loginResponse, mOkResponse);
+                    }
+                });
             }
         }).start();
     }

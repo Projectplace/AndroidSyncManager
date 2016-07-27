@@ -453,13 +453,14 @@ public abstract class SyncManager implements SyncObject.SyncListener {
 
         private void failSyncObjectsThatNeedAccessToken(Object error) {
             synchronized (mSyncLock) {
-                for (SyncObject upload : mUploadList) {
+                for (int i = mUploadList.size() - 1; i >= 0; i--) {
+                    SyncObject upload = mUploadList.get(i);
                     if (upload.needsAccessToken()) {
-                        upload.start();
                         upload.setError(error);
                     }
                 }
-                for (SyncObject fetch : mFetchList) {
+                for (int i = mFetchList.size() - 1; i >= 0; i--) {
+                    SyncObject fetch = mFetchList.get(i);
                     if (fetch.needsAccessToken()) {
                         fetch.setError(error);
                     }
@@ -529,6 +530,13 @@ public abstract class SyncManager implements SyncObject.SyncListener {
             while (!mRefreshDone) {
                 refresh();
                 waitRefreshLock();
+
+                // If refresh failed retry with a backoff delay
+                if (!mRefreshDone) {
+                    int nextTryIn = mRefreshTries * RESCHEDULE_BASE_TIME;
+                    syncLog("RefreshAccessTokenThread - Scheduling a new try in " + nextTryIn + " milliseconds");
+                    waitRefreshLock(nextTryIn);
+                }
             }
             syncLog("RefreshAccessTokenThread - Thread ending");
         }
@@ -556,13 +564,9 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     if (mRefreshTries >= MAX_REFRESH_TRIES) {
                         mRefreshDone = true;
                         mCallback.refreshAccessTokenFailed(error);
-                        notifyRefreshLock();
-                    } else {
-                        int nextTryIn = mRefreshTries * RESCHEDULE_BASE_TIME;
-                        syncLog("RefreshAccessTokenThread - Scheduling a new try in " + nextTryIn + " milliseconds");
-                        mRefreshing = false;
-                        waitRefreshLock(nextTryIn);
                     }
+                    mRefreshing = false;
+                    notifyRefreshLock();
                 }
             });
         }
