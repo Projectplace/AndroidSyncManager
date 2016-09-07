@@ -51,10 +51,24 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     private static SyncObject.SyncListener sTestListener;
     private static boolean sTestDisableNewSyncObjects;
 
+    /**
+     * Interface to implement for refresh access token.
+     */
     public interface RefreshAccessTokenCallback {
+        /**
+         * Refresh token succeeded. This will trigger the sync to be resumed.
+         */
         void refreshAccessTokenSuccess();
 
-        void refreshAccessTokenFailed(Object error);
+        /**
+         * Refresh token failed.
+         *
+         * @param error        The error which made the refresh fail. This is the error that will be sent to the sync listeners.
+         * @param abortRetries If true the refresh will not be retried with a back off algorithm. True should be sent if
+         *                     the fail is permanent, which could be if the access token has been clear because of a
+         *                     log out for example.
+         */
+        void refreshAccessTokenFailed(Object error, boolean abortRetries);
     }
 
     /**
@@ -427,7 +441,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                                 }
 
                                 @Override
-                                public void refreshAccessTokenFailed(Object error) {
+                                public void refreshAccessTokenFailed(Object error, boolean abortRetries) {
                                     mRefreshAccessTokenThread = null;
                                     failSyncObjectsThatNeedAccessToken(error);
                                 }
@@ -559,11 +573,11 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                 }
 
                 @Override
-                public void refreshAccessTokenFailed(final Object error) {
-                    syncLog("RefreshAccessTokenThread - Access token refresh failed");
-                    if (mRefreshTries >= MAX_REFRESH_TRIES) {
+                public void refreshAccessTokenFailed(final Object error, boolean abortRetries) {
+                    syncLog("RefreshAccessTokenThread - Access token refresh failed. Abort retries: " + abortRetries);
+                    if (mRefreshTries >= MAX_REFRESH_TRIES || abortRetries) {
                         mRefreshDone = true;
-                        mCallback.refreshAccessTokenFailed(error);
+                        mCallback.refreshAccessTokenFailed(error, abortRetries);
                     }
                     mRefreshing = false;
                     notifyRefreshLock();

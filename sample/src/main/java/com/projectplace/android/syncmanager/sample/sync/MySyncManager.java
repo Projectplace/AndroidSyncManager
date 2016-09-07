@@ -84,7 +84,7 @@ public class MySyncManager extends SyncManager {
 
                     @Override
                     public void failure(RetrofitError error) {
-                        callback.refreshAccessTokenFailed(error);
+                        callback.refreshAccessTokenFailed(error, false);
                     }
                 });
     }
