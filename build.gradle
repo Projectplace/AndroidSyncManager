@@ -12,12 +12,46 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.jfrog.bintray" version "1.7"
+}
+
+apply plugin: 'maven-publish'
+apply plugin: 'java'
+
 allprojects {
     repositories {
         jcenter()
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId 'com.projectplace.android.syncmanager'
+            artifactId 'gradle-project'
+            version '1.0'
+        }
+    }
+}
+
+bintray {
+    user = 'projectplace'
+    key = ''
+    publications = ['MyPublication']
+    pkg {
+        repo = 'maven'
+        name = 'com.projectplace.android.syncmanager'
+        desc = 'A lightweight sync manager for Android'
+        licenses = ['Apache-2.0']
+        websiteUrl = 'https://github.com/projectplace/androidsyncManager'
+        vcsUrl = 'https://github.com/projectplace/androidsyncManager.git'
+        version {
+            name = '1.0'
+            vcsTag = '1.0'
+            released  = new Date()
+            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+        }
+    }
 }
