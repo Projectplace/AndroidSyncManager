@@ -16,7 +16,7 @@ you it is possible to disable that.
 
 ```gradle
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {

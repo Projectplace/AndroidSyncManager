@@ -29,8 +29,8 @@ publishing {
     publications {
         MyPublication(MavenPublication) {
             from components.java
-            groupId 'com.projectplace.android.syncmanager'
-            artifactId 'gradle-project'
+            groupId 'com.projectplace.android'
+            artifactId 'syncmanager'
             version '1.0'
         }
     }
@@ -45,7 +45,7 @@ bintray {
         name = 'com.projectplace.android.syncmanager'
         desc = 'A lightweight sync manager for Android'
         licenses = ['Apache-2.0']
-        websiteUrl = 'https://github.com/projectplace/androidsyncManager'
+        websiteUrl = 'https://github.com/Projectplace/AndroidSyncManager'
         vcsUrl = 'https://github.com/projectplace/androidsyncManager.git'
         version {
             name = '1.0'
