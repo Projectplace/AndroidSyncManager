@@ -143,7 +143,7 @@ Check out the sample app<br/>
 [Sample app](https://github.com/Projectplace/AndroidSyncManager/tree/master/sample/src/main/java/com/projectplace/android/syncmanager/sample)<br/>
 
 ## License
-    Copyright 2016 Projectplace
+    Copyright (C) 2016 Planview, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
