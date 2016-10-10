@@ -27,3 +27,6 @@ dependencies {
     compile 'com.android.support:support-annotations:24.2.1'
     testCompile 'junit:junit:4.12'
 }
+
+// bintrayUpload config
+apply from: 'bintray-publish.gradle'
