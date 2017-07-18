@@ -48,6 +48,7 @@ public abstract class SyncObject {
     private boolean mStarted;
     private boolean mListenerCalled;
     private boolean mNeedsAccessToken = true;
+    private boolean mIsBackgroundSync = true;
 
     /**
      * Called when the sync object should save it synced data. This will always be called on a background thread
@@ -157,6 +158,14 @@ public abstract class SyncObject {
 
     public boolean needsAccessToken() {
         return mNeedsAccessToken;
+    }
+
+    public void setIsBackgroundSync(boolean background) {
+        mIsBackgroundSync = background;
+    }
+
+    public boolean isBackgroundSync() {
+        return mIsBackgroundSync;
     }
 
     public boolean isStarted() {
