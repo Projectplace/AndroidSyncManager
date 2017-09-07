@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 public abstract class SyncFetch extends SyncObject {
 
     private boolean mShouldReset;
+    private boolean mIsGroupFetch;
     private int mRetries;
 
     /**
@@ -65,6 +66,14 @@ public abstract class SyncFetch extends SyncObject {
 
     boolean shouldReset() {
         return mShouldReset;
+    }
+
+    boolean isIsGroupFetch() {
+        return mIsGroupFetch;
+    }
+
+    void setIsGroupFetch(boolean isGroupFetch) {
+        mIsGroupFetch = isGroupFetch;
     }
 
     /**

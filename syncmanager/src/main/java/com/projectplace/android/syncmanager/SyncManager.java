@@ -213,7 +213,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * @see {@link SyncFetch}
      */
     public void fetch(@NonNull SyncFetch newFetch) {
-        if (!sTestDisableNewSyncObjects) {
+        if (!sTestDisableNewSyncObjects || newFetch.isIsGroupFetch()) {
             synchronized (mSyncLock) {
                 syncLog("(Fetch) New " + newFetch.getClass().getSimpleName());
                 // If there already exists an identical fetch object in the fetch list then don't add it to gain performance.
@@ -378,10 +378,16 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... params) {
-                            syncFetch.onSave();
+                            // Group fetches is saved by the SyncFetchGroup
+                            if (!syncFetch.isIsGroupFetch()) {
+                                syncFetch.onSave();
+                            }
                             // Test listener needs to be called on background thread
                             if (sTestListener != null) {
                                 sTestListener.onFetchDone(syncFetch);
+                                if (syncFetch.getSyncListener() != null) {
+                                    syncFetch.getSyncListener().onFetchDone(syncFetch);
+                                }
                             }
                             return null;
                         }
@@ -396,6 +402,10 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                             }
                         }
                     }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+                } else if(syncFetch.isIsGroupFetch()) {
+                    syncLog("(onFetchDone) A conflict with an upload occurred. Remove this group fetch as it will be restarted by the group: " + syncFetch.getClass().getSimpleName());
+                    mFetchList.remove(syncFetch);
+                    syncFetch.getSyncListener().onFetchDone(syncFetch);
                 } else {
                     syncLog("(onFetchDone) A conflict with an upload occurred, reset and the fetch will be done again: " + syncFetch.getClass().getSimpleName());
                     // A conflict with an upload occurred, reset and the fetch will be done again
