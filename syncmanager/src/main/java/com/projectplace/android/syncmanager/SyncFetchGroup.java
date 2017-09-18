@@ -44,10 +44,19 @@ public abstract class SyncFetchGroup extends SyncFetch {
     @Override
     public final void onStart() {
         onAddFetches();
+
+        if (mFetches.size() == 0) {
+            throw new RuntimeException("Can not start fetch group with no fetches added");
+        }
     }
 
     @Override
     public final boolean isDone() {
+        // If no fetches it means the group was just reset and will be restarted
+        if (mFetches.size() == 0) {
+            return false;
+        }
+
         for (SyncFetch fetch : mFetches) {
             if (!fetch.isDone()) {
                 return false;
