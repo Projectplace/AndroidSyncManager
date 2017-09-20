@@ -18,7 +18,6 @@ public abstract class SyncFetchGroup extends SyncFetch {
 
     public SyncFetchGroup(SyncManager syncManager) {
         mSyncManager = syncManager;
-        syncManager.setLogsEnabled(true);
     }
 
     @Override
