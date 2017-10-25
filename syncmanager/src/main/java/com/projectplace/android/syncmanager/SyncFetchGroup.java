@@ -14,6 +14,9 @@ public abstract class SyncFetchGroup extends SyncFetch {
     private List<SyncFetch> mFetches = new ArrayList<>();
     private SyncManager mSyncManager;
 
+    /**
+     * Add the initial fetch objects to the group from this method.
+     */
     protected abstract void onAddFetches();
 
     public SyncFetchGroup(SyncManager syncManager) {
@@ -28,6 +31,9 @@ public abstract class SyncFetchGroup extends SyncFetch {
         onSaveGroup();
     }
 
+    /**
+     * Override if you need to save something more after the individual fetch objects doSave methods has been called.
+     */
     protected void onSaveGroup() {
     }
 
@@ -64,6 +70,9 @@ public abstract class SyncFetchGroup extends SyncFetch {
         return true;
     }
 
+    /**
+     * Add fetch objects to the group. The group won't be done until all fetch objects in the group are done.
+     */
     protected void add(SyncFetch fetch) {
         fetch.setIsGroupFetch(true);
         fetch.setSyncListener(new SyncObject.SyncListenerAdapter() {

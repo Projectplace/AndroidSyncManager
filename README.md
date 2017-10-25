@@ -20,7 +20,7 @@ you it is possible to disable that.
     }
 
     dependencies {
-        compile 'com.projectplace.android:syncmanager:1.0.4'
+        compile 'com.projectplace.android:syncmanager:1.1.0'
     }
 ```
 
@@ -113,6 +113,28 @@ For a fetch the main methods to implement are.
     public abstract void onStart();
 ```
 
+#### SyncFetchGroup
+To run several fetch objects together but with a synchronized saved operation you can use a SyncFetchGroup.
+Start by extending the SyncFetchGroup class and then implementing the onAddFetches() method to add the initial fetches.
+```java
+
+    /**
+    * Add the initial fetch objects to the group from this method.
+    */
+    protected abstract void onAddFetches()
+
+    /**
+    * Add fetch objects to the group. The group won't be done until all fetch objects in the group are done.
+    */
+    protected void add(SyncFetch fetch)
+
+    /**
+    * Override if you need to save something more after the individual fetch objects doSave methods has been called.
+    */
+    protected void onSaveGroup()
+```
+
+
 #### Queue and listen
 To queue a sync object and listen to the result do the following
 ```java
@@ -137,6 +159,7 @@ All important methods are documented. Check them out here.<br/>
 [com.projectplace.android.syncmanager.SyncObject](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncObject.java)<br/>
 [com.projectplace.android.syncmanager.SyncUpload](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncUpload.java)<br/>
 [com.projectplace.android.syncmanager.SyncFetch](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetch.java)<br/>
+[com.projectplace.android.syncmanager.SyncFetchGroup](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetchGroup.java)<br/>
 [com.projectplace.android.syncmanager.SyncFetchSimple](https://github.com/Projectplace/AndroidSyncManager/blob/master/syncmanager/src/main/java/com/projectplace/android/syncmanager/SyncFetchSimple.java)<br/>
 
 Check out the sample app<br/>
