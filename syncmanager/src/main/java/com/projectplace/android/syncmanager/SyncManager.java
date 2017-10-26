@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2016 Planview, Inc.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 
 package com.projectplace.android.syncmanager;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -177,7 +178,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     /**
      * Sets a listener to get callbacks when sync objects are finished.
      *
-     * @see {@link com.projectplace.android.syncmanager.SyncObject.SyncListener}
+     * @see com.projectplace.android.syncmanager.SyncObject.SyncListener
      */
     public void registerSyncListener(@NonNull SyncObject.SyncListener listener) {
         if (mSyncListeners.indexOf(listener) == -1) {
@@ -188,7 +189,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     /**
      * Unregisters a sync listener.
      *
-     * @see {@link SyncObject.SyncListener}
+     * @see SyncObject.SyncListener
      */
     public void unregisterSyncListener(@NonNull SyncObject.SyncListener listener) {
         mSyncListeners.remove(listener);
@@ -210,7 +211,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * Adds a fetch object to the sync queue. The fetch will be started as soon as possible.
      * If an upload object is running it will hold until that is finished first.
      *
-     * @see {@link SyncFetch}
+     * @see SyncFetch
      */
     public void fetch(@NonNull SyncFetch newFetch) {
         if (!sTestDisableNewSyncObjects || newFetch.isIsGroupFetch()) {
@@ -239,8 +240,9 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     /**
      * Adds an upload sync to the sync queue. The upload will be started as soon as possible.
      *
-     * @see {@link SyncUpload}
+     * @see SyncUpload
      */
+    @SuppressLint("StaticFieldLeak")
     public void upload(@NonNull final SyncUpload newUpload) {
         if (!sTestDisableNewSyncObjects) {
             synchronized (mSyncLock) {
@@ -274,6 +276,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     /**
      * Internal callback when an upload is finished. This should never be called from outside of the sync manager.
      */
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onUploadDone(@NonNull final SyncUpload syncUpload) {
         synchronized (mSyncLock) {
@@ -337,6 +340,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     /**
      * Internal callback when a fetch is finished. This should never be called from outside of the sync manager.
      */
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onFetchDone(@NonNull final SyncFetch syncFetch) {
         // If sync is stopped we should not save anything
@@ -561,7 +565,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         private boolean mRefreshing;
         private int mRefreshTries;
 
-        public RefreshAccessTokenThread(RefreshAccessTokenCallback callback) {
+        RefreshAccessTokenThread(RefreshAccessTokenCallback callback) {
             mCallback = callback;
         }
 
