@@ -28,6 +28,8 @@ public abstract class SyncObject {
         void onFetchDone(SyncFetch syncFetch);
 
         void onUploadDone(SyncUpload syncUpload);
+
+        void onSyncAborted(SyncObject syncObject);
     }
 
     public static class SyncListenerAdapter implements SyncListener {
@@ -37,6 +39,10 @@ public abstract class SyncObject {
 
         @Override
         public void onUploadDone(SyncUpload syncUpload) {
+        }
+
+        @Override
+        public void onSyncAborted(SyncObject syncObject) {
         }
     }
 

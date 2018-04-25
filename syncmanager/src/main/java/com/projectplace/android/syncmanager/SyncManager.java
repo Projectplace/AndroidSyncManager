@@ -279,6 +279,12 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onUploadDone(@NonNull final SyncUpload syncUpload) {
+        // If sync is stopped we should not save anything
+        if (mSyncStopped) {
+            onSyncAborted(syncUpload);
+            return;
+        }
+
         synchronized (mSyncLock) {
             syncLog("(onUploadDone) " + syncUpload.getClass().getSimpleName());
             mUploadList.remove(syncUpload);
@@ -345,12 +351,13 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     public void onFetchDone(@NonNull final SyncFetch syncFetch) {
         // If sync is stopped we should not save anything
         if (mSyncStopped) {
+            onSyncAborted(syncFetch);
             return;
         }
 
         syncLog("(onFetchDone) " + syncFetch.getClass().getSimpleName());
         if (syncFetch.isFailed()) {
-            // If a fetch has failed, just remove it an tell the listeners.
+            // If a fetch has failed, just remove it and tell the listeners.
             // Or if it has any retries left then reset and try again.
             if (syncFetch.getRetries() != 0) {
                 syncLog("(onFetchDone) SyncFetch failed, retrying. Retries left: " + (syncFetch.getRetries() - 1));
@@ -421,6 +428,16 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         syncLog("(onFetchDone) FetchList size: " + mFetchList.size());
     }
 
+    @Override
+    public void onSyncAborted(SyncObject syncObject) {
+        for (SyncObject.SyncListener listener : mSyncListeners) {
+            listener.onSyncAborted(syncObject);
+        }
+        if (syncObject.getSyncListener() != null) {
+            syncObject.getSyncListener().onSyncAborted(syncObject);
+        }
+    }
+
     /**
      * By default a toast with the error message will be shown. This can however
      * be overridden and a custom error can be displayed instead.
@@ -460,6 +477,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                         } else {
                             mUploadList.remove(syncObject);
                         }
+                        onSyncAborted(syncObject);
                     } else if (mUsesAccessToken && syncObject != null && syncObject.needsAccessToken() && shouldRefreshAccessToken()) {
                         syncLog("Sync Thread - Access token needs to be refreshed");
                         if (mRefreshAccessTokenThread == null) {
