@@ -16,6 +16,8 @@
 
 package com.projectplace.android.syncmanager;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +95,7 @@ public abstract class SyncFetchGroup extends SyncFetch {
         fetch.setIsGroupFetch(true);
         fetch.setSyncListener(new SyncObject.SyncListenerAdapter() {
             @Override
-            public void onFetchDone(SyncFetch syncFetch) {
+            public void onFetchDone(@NonNull SyncFetch syncFetch) {
                 if (syncFetch.isFailed()) {
                     setErrorAndMessage(syncFetch.getError(), syncFetch.getErrorMessage());
                 }

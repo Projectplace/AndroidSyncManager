@@ -25,24 +25,24 @@ import android.support.annotation.NonNull;
  */
 public abstract class SyncObject {
     public interface SyncListener {
-        void onFetchDone(SyncFetch syncFetch);
+        void onFetchDone(@NonNull SyncFetch syncFetch);
 
-        void onUploadDone(SyncUpload syncUpload);
+        void onUploadDone(@NonNull SyncUpload syncUpload);
 
-        void onSyncAborted(SyncObject syncObject);
+        void onSyncAborted(@NonNull SyncObject syncObject);
     }
 
     public static class SyncListenerAdapter implements SyncListener {
         @Override
-        public void onFetchDone(SyncFetch syncFetch) {
+        public void onFetchDone(@NonNull SyncFetch syncFetch) {
         }
 
         @Override
-        public void onUploadDone(SyncUpload syncUpload) {
+        public void onUploadDone(@NonNull SyncUpload syncUpload) {
         }
 
         @Override
-        public void onSyncAborted(SyncObject syncObject) {
+        public void onSyncAborted(@NonNull SyncObject syncObject) {
         }
     }
 

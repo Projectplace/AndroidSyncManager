@@ -429,7 +429,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
     }
 
     @Override
-    public void onSyncAborted(SyncObject syncObject) {
+    public void onSyncAborted(@NonNull SyncObject syncObject) {
         for (SyncObject.SyncListener listener : mSyncListeners) {
             listener.onSyncAborted(syncObject);
         }
