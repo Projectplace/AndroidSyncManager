@@ -445,7 +445,8 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * @param syncObject The sync object which has failed for some reason.
      */
     protected void showError(@NonNull SyncObject syncObject) {
-        if (syncObject.getErrorMessage() != null) {
+        // Don't make toast if in test as that is run on background thread
+        if (syncObject.getErrorMessage() != null && sTestListener == null) {
             Toast.makeText(mApplicationContext, syncObject.getErrorMessage(), Toast.LENGTH_LONG).show();
         }
     }
