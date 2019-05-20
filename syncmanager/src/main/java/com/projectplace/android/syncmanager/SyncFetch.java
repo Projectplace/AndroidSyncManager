@@ -16,7 +16,7 @@
 
 package com.projectplace.android.syncmanager;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * This class should be subclassed for all sync requests that fetches data.

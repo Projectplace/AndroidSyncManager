@@ -18,7 +18,7 @@ package com.projectplace.android.syncmanager;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Top class of both fetch and upload sync objects.
