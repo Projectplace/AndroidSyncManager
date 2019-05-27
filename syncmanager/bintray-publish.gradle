@@ -64,6 +64,8 @@ artifacts {
     archives sourcesJar
 }
 
+// Add bintray.apikey=xxxxx to local.properties in the main project then run ./gradlew bintrayUpload.
+// The api key can be found in the bintray account.
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
