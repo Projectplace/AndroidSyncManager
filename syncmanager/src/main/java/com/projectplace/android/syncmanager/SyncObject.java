@@ -80,6 +80,7 @@ public abstract class SyncObject {
 
     void reset() {
         mError = null;
+        mErrorMessage = null;
         mFailed = false;
         mStarted = false;
         mListenerCalled = false;
@@ -140,6 +141,8 @@ public abstract class SyncObject {
     }
 
     private void syncDone() {
+        if (mManagerSyncListener == null) return;
+
         if (this instanceof SyncFetch) {
             mManagerSyncListener.onFetchDone((SyncFetch) this);
         } else {
