@@ -17,6 +17,8 @@
 package com.projectplace.android.syncmanager.sample;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
@@ -132,6 +134,10 @@ public class MainActivity extends AppCompatActivity implements SyncObject.SyncLi
         }
 
         renderText();
+    }
+
+    @Override
+    public void onSyncAborted(@NonNull SyncObject syncObject) {
     }
 
     private void renderText() {

@@ -336,6 +336,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     }
                     if (syncUpload.getSyncListener() != null) {
                         syncUpload.getSyncListener().onUploadDone(syncUpload);
+                        syncUpload.setSyncListener(null);
                     }
                 }
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
@@ -410,6 +411,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                             }
                             if (syncFetch.getSyncListener() != null) {
                                 syncFetch.getSyncListener().onFetchDone(syncFetch);
+                                syncFetch.setSyncListener(null);
                             }
                         }
                     }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
@@ -435,6 +437,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
         }
         if (syncObject.getSyncListener() != null) {
             syncObject.getSyncListener().onSyncAborted(syncObject);
+            syncObject.setSyncListener(null);
         }
     }
 

@@ -28,6 +28,11 @@ public abstract class SyncUpload extends SyncObject {
         setIsBackgroundSync(false);
     }
 
+    public void reset() {
+        super.reset();
+        mUploadSucceeded = false;
+    }
+
     /**
      * An extra prepare runnable can be added to the sync object to be able to run prepare operations outside the sync
      * object. This will be called directly after the sync object has been added to the sync manager.
