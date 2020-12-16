@@ -20,7 +20,7 @@ you it is possible to disable that.
     }
 
     dependencies {
-        compile 'com.projectplace.android:syncmanager:1.1.1'
+        compile 'com.projectplace.android:syncmanager:1.1.2'
     }
 ```
 
