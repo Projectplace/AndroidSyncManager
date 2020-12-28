@@ -102,7 +102,7 @@ public abstract class SyncObject {
      * @param error        An object of any kind that describes the error.
      * @param errorMessage A message to be shown as a toast.
      */
-    protected void setErrorAndMessage(Object error, String errorMessage) {
+    public void setErrorAndMessage(Object error, String errorMessage) {
         mErrorMessage = errorMessage;
         setError(error);
     }
@@ -113,7 +113,7 @@ public abstract class SyncObject {
      *
      * @param error An object of any kind that describes the error.
      */
-    protected void setError(Object error) {
+    public void setError(Object error) {
         mError = error;
         setFailed(true);
     }
