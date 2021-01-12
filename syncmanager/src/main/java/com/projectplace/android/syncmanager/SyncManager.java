@@ -26,6 +26,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles all sync requests that fetches and uploads data with the backend server.
@@ -181,7 +182,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      * @see com.projectplace.android.syncmanager.SyncObject.SyncListener
      */
     public void registerSyncListener(@NonNull SyncObject.SyncListener listener) {
-        if (mSyncListeners.indexOf(listener) == -1) {
+        if (!mSyncListeners.contains(listener)) {
             mSyncListeners.add(listener);
         }
     }
@@ -193,6 +194,10 @@ public abstract class SyncManager implements SyncObject.SyncListener {
      */
     public void unregisterSyncListener(@NonNull SyncObject.SyncListener listener) {
         mSyncListeners.remove(listener);
+    }
+
+    public List<SyncObject.SyncListener> getRegisteredSyncListeners() {
+        return mSyncListeners;
     }
 
     private boolean containsIdenticalFetch(@NonNull SyncFetch fetch) {
