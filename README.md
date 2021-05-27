@@ -12,18 +12,6 @@ you it is possible to disable that.
 * Conflict handling between uploads and fetches
 * Callbacks to refresh access tokens if needed before the sync object is run
 
-## Download lib with gradle
-
-```gradle
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        compile 'com.projectplace.android:syncmanager:1.1.4'
-    }
-```
-
 ## Usage
 To understand how to use the SyncManager best is to look at the sample app and to check the java doc on the SyncManager, SyncUpload and SyncFetch.
 But below is the main things to think about.
