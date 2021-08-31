@@ -7,13 +7,11 @@ repositories {
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
     }
     buildTypes {
         release {
@@ -26,5 +24,5 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.annotation:annotation:1.2.0'
-    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'junit:junit:4.13.2'
 }

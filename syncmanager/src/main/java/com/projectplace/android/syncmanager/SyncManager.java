@@ -229,6 +229,7 @@ public abstract class SyncManager implements SyncObject.SyncListener {
                     startSync();
                 } else {
                     syncLog("(Fetch) Equal fetch object found, don't add");
+                    onSyncAborted(newFetch);
                 }
             }
         }
