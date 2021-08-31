@@ -35,7 +35,6 @@ app/testdb.sqlite-journal
 #Jenkins build files
 caches/
 native/
-wrapper/
 *.sqlite
 
 *.sqlite-journal
