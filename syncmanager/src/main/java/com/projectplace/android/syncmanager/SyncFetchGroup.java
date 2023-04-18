@@ -37,6 +37,12 @@ public abstract class SyncFetchGroup extends SyncFetch {
      */
     protected abstract void onAddFetches();
 
+    /**
+     * Override this if you need to add extra fetches after the first fetches are done.
+     */
+    protected void onAddAfterDoneFetches() {
+    }
+
     public SyncFetchGroup(SyncManager syncManager) {
         mSyncManager = syncManager;
     }
@@ -99,7 +105,10 @@ public abstract class SyncFetchGroup extends SyncFetch {
                 if (syncFetch.isFailed()) {
                     setErrorAndMessage(syncFetch.getError(), syncFetch.getErrorMessage());
                 }
-                checkIfDone();
+                if (isDone()) {
+                    onAddAfterDoneFetches();
+                    checkIfDone();
+                }
             }
         });
         mFetches.add(fetch);
